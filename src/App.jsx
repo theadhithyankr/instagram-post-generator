@@ -7,7 +7,48 @@ import {
   Layers, Trash2, SquareDashed, Type, Settings2, Palette,
 } from 'lucide-react'
 
-// ─── Constants ──────────────────────────────────────────────────────────────
+// ─── UI Primitives (NEW) ──────────────────────────────────────────────────────
+
+function SectionLabelNew({ children }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <span className="text-[9px] font-bold tracking-[0.18em] uppercase text-zinc-400">{children}</span>
+      <div className="flex-1 border-t border-zinc-100" />
+    </div>
+  )
+}
+
+function ColorInput({ label, value, onChange }) {
+  return (
+    <div>
+      {label && <span className="text-[10px] font-medium text-zinc-400 block mb-1.5">{label}</span>}
+      <label className="flex items-center gap-2.5 px-3 py-2 bg-white border border-zinc-200 rounded-xl cursor-pointer hover:border-zinc-300 transition-colors">
+        <input type="color" value={value} onChange={(e) => onChange(e.target.value)}
+          className="w-5 h-5 rounded-md cursor-pointer border-0 bg-transparent p-0 shrink-0" />
+        <span className="text-xs font-mono text-zinc-500 tracking-wider">{value}</span>
+      </label>
+    </div>
+  )
+}
+
+function SegmentControl({ options, value, onChange }) {
+  return (
+    <div className="flex bg-zinc-100 rounded-xl p-0.5 gap-0.5">
+      {options.map((opt) => (
+        <button key={opt.value ?? opt} onClick={() => onChange(opt.value ?? opt)}
+          className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+            (opt.value ?? opt) === value
+              ? 'bg-white text-zinc-900 shadow-sm'
+              : 'text-zinc-400 hover:text-zinc-600'
+          }`}>
+          {opt.label ?? opt}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// ─── Constants ─────────────────────────────────────────────────────────────
 
 const PRESETS = [
   { label: '1:1', sublabel: 'Square', width: 1080, height: 1080 },
@@ -72,31 +113,32 @@ const DEFAULT_POEM = `In the hush of dusk\nthe poem finds its shape—\nnot in t
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms))
 
-// ─── Small UI helpers ────────────────────────────────────────────────────────
+// ─── Retained UI helpers ────────────────────────────────────────────────────
 
-function Label({ children }) {
-  return <span className="text-[10px] font-semibold tracking-widest uppercase text-zinc-400">{children}</span>
-}
 function Divider() {
-  return <div className="border-t border-zinc-100 my-5" />
+  return <div className="border-t border-zinc-100 my-6" />
 }
 function IconBtn({ active, onClick, title, children, size = 'md' }) {
   const pad = size === 'sm' ? 'p-1.5' : 'p-2'
   return (
     <button title={title} onClick={onClick}
-      className={`${pad} rounded-md transition-all duration-150 ${active ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}>
+      className={`${pad} rounded-lg transition-all duration-150 ${
+        active
+          ? 'bg-zinc-900 text-white shadow-sm'
+          : 'text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100'
+      }`}>
       {children}
     </button>
   )
 }
 function SliderRow({ label, min, max, step = 1, value, onChange, display }) {
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-2">
-        <Label>{label}</Label>
-        <span className="text-xs font-semibold text-zinc-500 tabular-nums">{display ?? value}</span>
+    <div className="mb-5">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[11px] font-medium text-zinc-500">{label}</span>
+        <span className="text-[11px] font-semibold text-zinc-700 tabular-nums bg-zinc-100 px-2 py-0.5 rounded-full">{display ?? value}</span>
       </div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full" />
     </div>
   )
 }
@@ -332,198 +374,188 @@ export default function App() {
 
   const PanelText = () => (
     <div>
-      <div className="mb-5">
-        <Label>Poem</Label>
-        <textarea value={poem} onChange={(e) => setPoem(e.target.value)}
-          placeholder="Write your poem here…" rows={7}
-          className="mt-2 w-full text-sm text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2.5 leading-relaxed focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors placeholder:text-zinc-300"
-          style={{ fontFamily: font.family }} />
-      </div>
-      <div className="mb-5">
-        <Label>Style</Label>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <div className="flex bg-zinc-100 rounded-md p-0.5 gap-0.5">
-            <IconBtn active={isBold}      onClick={() => setIsBold(v => !v)}      title="Bold"      size="sm"><Bold size={13} /></IconBtn>
-            <IconBtn active={isItalic}    onClick={() => setIsItalic(v => !v)}    title="Italic"    size="sm"><Italic size={13} /></IconBtn>
-            <IconBtn active={isUppercase} onClick={() => setIsUppercase(v => !v)} title="Uppercase" size="sm">
-              <span className="text-[11px] font-bold leading-none">AG</span>
-            </IconBtn>
-          </div>
-          <div className="flex bg-zinc-100 rounded-md p-0.5 gap-0.5">
-            <IconBtn active={align === 'left'}   onClick={() => setAlign('left')}   title="Left"   size="sm"><AlignLeft size={13} /></IconBtn>
-            <IconBtn active={align === 'center'} onClick={() => setAlign('center')} title="Center" size="sm"><AlignCenter size={13} /></IconBtn>
-            <IconBtn active={align === 'right'}  onClick={() => setAlign('right')}  title="Right"  size="sm"><AlignRight size={13} /></IconBtn>
-          </div>
-          <div className="flex bg-zinc-100 rounded-md p-0.5 gap-0.5">
-            <IconBtn active={vCenter}  onClick={() => setVCenter(true)}  title="Center vertically" size="sm"><AlignVerticalJustifyCenter size={13} /></IconBtn>
-            <IconBtn active={!vCenter} onClick={() => setVCenter(false)} title="Align top"         size="sm"><AlignStartVertical size={13} /></IconBtn>
-          </div>
+      <SectionLabelNew>Poem</SectionLabelNew>
+      <textarea value={poem} onChange={(e) => setPoem(e.target.value)}
+        placeholder="Write your poem here…" rows={7}
+        className="w-full text-sm text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 leading-relaxed focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:bg-white transition-all placeholder:text-zinc-300 resize-none mb-6"
+        style={{ fontFamily: font.family }}
+      />
+
+      <SectionLabelNew>Formatting</SectionLabelNew>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex bg-zinc-100 rounded-xl p-0.5 gap-0.5">
+          <IconBtn active={isBold}      onClick={() => setIsBold(v => !v)}      title="Bold"      size="sm"><Bold size={13} /></IconBtn>
+          <IconBtn active={isItalic}    onClick={() => setIsItalic(v => !v)}    title="Italic"    size="sm"><Italic size={13} /></IconBtn>
+          <IconBtn active={isUppercase} onClick={() => setIsUppercase(v => !v)} title="Uppercase" size="sm">
+            <span className="text-[11px] font-bold leading-none select-none">AG</span>
+          </IconBtn>
+        </div>
+        <div className="flex bg-zinc-100 rounded-xl p-0.5 gap-0.5">
+          <IconBtn active={align === 'left'}   onClick={() => setAlign('left')}   title="Align Left"   size="sm"><AlignLeft size={13} /></IconBtn>
+          <IconBtn active={align === 'center'} onClick={() => setAlign('center')} title="Align Center" size="sm"><AlignCenter size={13} /></IconBtn>
+          <IconBtn active={align === 'right'}  onClick={() => setAlign('right')}  title="Align Right"  size="sm"><AlignRight size={13} /></IconBtn>
+        </div>
+        <div className="flex bg-zinc-100 rounded-xl p-0.5 gap-0.5">
+          <IconBtn active={vCenter}  onClick={() => setVCenter(true)}  title="Center vertically" size="sm"><AlignVerticalJustifyCenter size={13} /></IconBtn>
+          <IconBtn active={!vCenter} onClick={() => setVCenter(false)} title="Align top"         size="sm"><AlignStartVertical size={13} /></IconBtn>
         </div>
       </div>
-      <div className="mb-5">
-        <Label>Typeface</Label>
-        <div className="mt-2 space-y-1.5">
-          {FONTS.map((f) => (
-            <button key={f.value} onClick={() => setFont(f)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-md border text-left transition-all duration-150 ${font.value === f.value ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200 text-zinc-700 hover:border-zinc-400'}`}>
-              <div>
-                <p className="text-sm leading-none font-medium" style={{ fontFamily: f.family }}>{f.label}</p>
-                <p className="text-[10px] mt-0.5 text-zinc-400">{f.description}</p>
-              </div>
-              <span className={`text-xs italic ${font.value === f.value ? 'text-zinc-300' : 'text-zinc-400'}`} style={{ fontFamily: f.family }}>Aa</span>
-            </button>
-          ))}
-        </div>
+
+      <SectionLabelNew>Typeface</SectionLabelNew>
+      <div className="space-y-2 mb-6">
+        {FONTS.map((f) => (
+          <button key={f.value} onClick={() => setFont(f)}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border text-left transition-all duration-150 ${
+              font.value === f.value
+                ? 'border-zinc-900 bg-zinc-900 text-white shadow-md'
+                : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+            }`}>
+            <div>
+              <p className="text-sm font-semibold leading-none" style={{ fontFamily: f.family }}>{f.label}</p>
+              <p className="text-[10px] mt-1 text-zinc-400">{f.description}</p>
+            </div>
+            <span className={`text-xl italic select-none ${font.value === f.value ? 'text-zinc-400' : 'text-zinc-300'}`}
+              style={{ fontFamily: f.family }}>Aa</span>
+          </button>
+        ))}
       </div>
-      <SliderRow label="Font Size"       min={12}  max={120} value={fontSize}   onChange={setFontSize}   display={`${fontSize}px`} />
-      <SliderRow label="Line Height"     min={10}  max={30}  value={Math.round(lineHeight * 10)} onChange={v => setLineHeight(v / 10)} display={lineHeight.toFixed(1)} />
-      <SliderRow label="Letter Spacing"  min={-5}  max={20}  value={letterSpacing} onChange={setLetterSpacing} display={`${letterSpacing > 0 ? '+' : ''}${letterSpacing}px`} />
-      <SliderRow label="Padding"         min={0}   max={240} step={8} value={padding} onChange={setPadding} display={`${padding}px`} />
+
+      <SectionLabelNew>Typography</SectionLabelNew>
+      <SliderRow label="Font Size"      min={12}  max={120} value={fontSize}   onChange={setFontSize}   display={`${fontSize}px`} />
+      <SliderRow label="Line Height"    min={10}  max={30}  value={Math.round(lineHeight * 10)} onChange={v => setLineHeight(v / 10)} display={lineHeight.toFixed(1)} />
+      <SliderRow label="Letter Spacing" min={-5}  max={20}  value={letterSpacing} onChange={setLetterSpacing} display={`${letterSpacing > 0 ? '+' : ''}${letterSpacing}px`} />
+      <SliderRow label="Padding"        min={0}   max={240} step={8} value={padding} onChange={setPadding} display={`${padding}px`} />
     </div>
   )
 
   const PanelStyle = () => (
     <div>
-      <div className="mb-5">
-        <Label>Aspect Ratio</Label>
-        <div className="mt-2 grid grid-cols-3 gap-1.5">
-          {PRESETS.map((p) => (
-            <button key={p.label} onClick={() => setPreset(p)}
-              className={`flex flex-col items-center py-2.5 rounded-md border text-xs font-medium transition-all ${preset.label === p.label ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm' : 'border-zinc-200 text-zinc-500 hover:border-zinc-400'}`}>
-              <span className="font-bold text-sm">{p.label}</span>
-              <span className={`text-[10px] mt-0.5 ${preset.label === p.label ? 'text-zinc-300' : 'text-zinc-400'}`}>{p.sublabel}</span>
-            </button>
-          ))}
-        </div>
+      <SectionLabelNew>Canvas Format</SectionLabelNew>
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        {PRESETS.map((p) => (
+          <button key={p.label} onClick={() => setPreset(p)}
+            className={`flex flex-col items-center py-3 rounded-2xl border transition-all duration-150 ${
+              preset.label === p.label
+                ? 'border-zinc-900 bg-zinc-900 text-white shadow-md'
+                : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50'
+            }`}>
+            <span className="text-sm font-bold">{p.label}</span>
+            <span className={`text-[10px] mt-0.5 font-medium ${preset.label === p.label ? 'text-zinc-400' : 'text-zinc-400'}`}>{p.sublabel}</span>
+          </button>
+        ))}
       </div>
+
       <Divider />
-      <div className="mb-5">
-        <Label>Quick Theme</Label>
-        <div className="mt-2 grid grid-cols-2 gap-1.5">
-          {THEMES.map((t) => (
+
+      <SectionLabelNew>Quick Theme</SectionLabelNew>
+      <div className="grid grid-cols-2 gap-2 mb-6">
+        {THEMES.map((t) => {
+          const isActive = bgType === 'solid' && bgColor === t.bg && textColor === t.text
+          return (
             <button key={t.label} onClick={() => applyTheme(t)}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-md border text-xs font-medium transition-all ${bgType === 'solid' && bgColor === t.bg && textColor === t.text ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200 text-zinc-600 hover:border-zinc-400'}`}>
-              <span className="w-4 h-4 rounded-sm border border-zinc-200 shrink-0" style={{ background: t.bg }} />
-              <div><p className="font-semibold leading-none">{t.label}</p><p className="text-[9px] text-zinc-400 mt-0.5">{t.desc}</p></div>
+              className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl border transition-all duration-150 ${
+                isActive
+                  ? 'border-zinc-900 bg-zinc-900 text-white shadow-md'
+                  : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+              }`}>
+              <span className="w-5 h-5 rounded-lg border border-zinc-300 shrink-0 shadow-sm" style={{ background: t.bg }} />
+              <div className="text-left">
+                <p className="text-xs font-semibold leading-none">{t.label}</p>
+                <p className={`text-[10px] mt-0.5 ${isActive ? 'text-zinc-400' : 'text-zinc-400'}`}>{t.desc}</p>
+              </div>
             </button>
-          ))}
-        </div>
+          )
+        })}
       </div>
-      <div className="mb-4">
-        <Label>Background</Label>
-        <div className="mt-2 flex bg-zinc-100 rounded-md p-0.5 gap-0.5 w-fit">
-          <button onClick={() => setBgType('solid')}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${bgType === 'solid' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500'}`}>Solid</button>
-          <button onClick={() => setBgType('gradient')}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${bgType === 'gradient' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500'}`}>Gradient</button>
-        </div>
-      </div>
+
+      <Divider />
+
+      <SectionLabelNew>Background</SectionLabelNew>
+      <SegmentControl
+        options={[{ label: 'Solid', value: 'solid' }, { label: 'Gradient', value: 'gradient' }]}
+        value={bgType}
+        onChange={setBgType}
+      />
+
       {bgType === 'solid' ? (
-        <div className="mb-5 flex gap-3">
-          <div className="flex-1">
-            <Label>BG Color</Label>
-            <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md">
-              <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-              <span className="text-xs text-zinc-500 font-mono">{bgColor}</span>
-            </div>
-          </div>
-          <div className="flex-1">
-            <Label>Text Color</Label>
-            <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md">
-              <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-              <span className="text-xs text-zinc-500 font-mono">{textColor}</span>
-            </div>
-          </div>
+        <div className="mt-4 grid grid-cols-2 gap-3 mb-6">
+          <ColorInput label="Background" value={bgColor} onChange={setBgColor} />
+          <ColorInput label="Text" value={textColor} onChange={setTextColor} />
         </div>
       ) : (
-        <div className="mb-5">
-          <Label>Gradient Presets</Label>
-          <div className="mt-2 grid grid-cols-3 gap-1.5 mb-3">
+        <div className="mt-4 mb-6">
+          <span className="text-[10px] font-medium text-zinc-400 block mb-2">Gradient Presets</span>
+          <div className="grid grid-cols-6 gap-1.5 mb-4">
             {GRAD_PRESETS.map((g) => (
               <button key={g.label} onClick={() => { setGradColor1(g.c1); setGradColor2(g.c2); setGradAngle(g.angle) }}
-                title={g.label} className="h-8 rounded-md border border-white/10 shadow-sm hover:scale-105 transition-transform"
+                title={g.label}
+                className="aspect-square rounded-xl border-2 border-white shadow-sm hover:scale-110 transition-transform"
                 style={{ background: `linear-gradient(${g.angle}deg, ${g.c1}, ${g.c2})` }} />
             ))}
           </div>
-          <div className="flex gap-3 mb-3">
-            <div className="flex-1">
-              <Label>Color 1</Label>
-              <div className="mt-1.5 flex items-center gap-2 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md">
-                <input type="color" value={gradColor1} onChange={(e) => setGradColor1(e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-                <span className="text-xs text-zinc-500 font-mono">{gradColor1}</span>
-              </div>
-            </div>
-            <div className="flex-1">
-              <Label>Color 2</Label>
-              <div className="mt-1.5 flex items-center gap-2 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md">
-                <input type="color" value={gradColor2} onChange={(e) => setGradColor2(e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-                <span className="text-xs text-zinc-500 font-mono">{gradColor2}</span>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <ColorInput label="Color 1" value={gradColor1} onChange={setGradColor1} />
+            <ColorInput label="Color 2" value={gradColor2} onChange={setGradColor2} />
           </div>
           <SliderRow label="Angle" min={0} max={360} value={gradAngle} onChange={setGradAngle} display={`${gradAngle}°`} />
-          <Label>Text Color</Label>
-          <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md">
-            <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-            <span className="text-xs text-zinc-500 font-mono">{textColor}</span>
+          <ColorInput label="Text" value={textColor} onChange={setTextColor} />
+        </div>
+      )}
+
+      <Divider />
+
+      <SectionLabelNew>Author / Watermark</SectionLabelNew>
+      <input type="text" value={watermark} onChange={(e) => setWatermark(e.target.value)}
+        placeholder="— @your_handle"
+        className="w-full text-sm bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:bg-white transition-all placeholder:text-zinc-300"
+      />
+      {watermark && (
+        <div className="mt-4">
+          <SliderRow label="Size" min={10} max={48} value={watermarkSize} onChange={setWatermarkSize} display={`${watermarkSize}px`} />
+          <div className="mb-5">
+            <span className="text-[11px] font-medium text-zinc-500 block mb-2">Alignment</span>
+            <SegmentControl
+              options={[{ label: 'Left', value: 'left' }, { label: 'Center', value: 'center' }, { label: 'Right', value: 'right' }]}
+              value={watermarkAlign}
+              onChange={setWatermarkAlign}
+            />
           </div>
         </div>
       )}
-      <Divider />
-      <div className="mb-5">
-        <Label>Author / Watermark</Label>
-        <input type="text" value={watermark} onChange={(e) => setWatermark(e.target.value)}
-          placeholder="— @your_handle"
-          className="mt-2 w-full text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors placeholder:text-zinc-300" />
-        {watermark && (
-          <div className="mt-3 space-y-3">
-            <SliderRow label="Size" min={10} max={48} value={watermarkSize} onChange={setWatermarkSize} display={`${watermarkSize}px`} />
-            <div>
-              <Label>Align</Label>
-              <div className="mt-2 flex bg-zinc-100 rounded-md p-0.5 gap-0.5 w-fit">
-                {['left','center','right'].map(a => (
-                  <button key={a} onClick={() => setWatermarkAlign(a)}
-                    className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${watermarkAlign === a ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500'}`}>
-                    {a.charAt(0).toUpperCase() + a.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   )
 
   const PanelFrame = () => (
     <div>
-      <div className="mb-5">
-        <Label>Frame Style</Label>
-        <div className="mt-2 grid grid-cols-3 gap-1.5">
-          {FRAME_STYLES.map((f) => (
-            <button key={f.value} onClick={() => setFrameStyle(f.value)}
-              className={`py-2 rounded-md border text-xs font-medium transition-all ${frameStyle === f.value ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200 text-zinc-600 hover:border-zinc-400'}`}>
-              {f.label}
-            </button>
-          ))}
-        </div>
+      <SectionLabelNew>Border Style</SectionLabelNew>
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        {FRAME_STYLES.map((f) => (
+          <button key={f.value} onClick={() => setFrameStyle(f.value)}
+            className={`py-2.5 rounded-2xl border text-xs font-semibold transition-all duration-150 ${
+              frameStyle === f.value
+                ? 'border-zinc-900 bg-zinc-900 text-white shadow-md'
+                : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50'
+            }`}>
+            {f.label}
+          </button>
+        ))}
       </div>
       {frameStyle !== 'none' && (
         <>
-          <div className="mb-4">
-            <Label>Frame Color</Label>
-            <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md">
-              <input type="color" value={frameColor} onChange={(e) => setFrameColor(e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-              <span className="text-xs text-zinc-500 font-mono">{frameColor}</span>
-            </div>
-            <div className="mt-2 flex gap-2 flex-wrap">
-              {['#000000','#ffffff','#c9a96e','#a0c4a1','#b4a7d6','#e8b4b8'].map(c => (
-                <button key={c} onClick={() => setFrameColor(c)}
-                  className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 ${frameColor === c ? 'border-zinc-600 scale-110' : 'border-zinc-200'}`}
-                  style={{ background: c }} />
-              ))}
-            </div>
+          <SectionLabelNew>Frame Color</SectionLabelNew>
+          <div className="mb-3">
+            <ColorInput label="" value={frameColor} onChange={setFrameColor} />
           </div>
+          <div className="flex gap-2 flex-wrap mb-6">
+            {['#000000','#ffffff','#c9a96e','#a0c4a1','#b4a7d6','#e8b4b8'].map(c => (
+              <button key={c} onClick={() => setFrameColor(c)}
+                className={`w-8 h-8 rounded-xl border-2 transition-all hover:scale-110 ${
+                  frameColor === c ? 'border-zinc-600 scale-110 shadow-sm' : 'border-zinc-200'
+                }`}
+                style={{ background: c }} />
+            ))}
+          </div>
+          <SectionLabelNew>Frame Options</SectionLabelNew>
           <SliderRow label="Frame Width" min={1} max={30} value={frameWidth} onChange={setFrameWidth} display={`${frameWidth}px`} />
           {(frameStyle === 'double' || frameStyle === 'inset' || frameStyle === 'corner') && (
             <SliderRow label="Gap / Inset" min={4} max={80} value={frameGap} onChange={setFrameGap} display={`${frameGap}px`} />
@@ -538,51 +570,53 @@ export default function App() {
 
   const PanelSettings = () => (
     <div>
-      <div className="mb-5">
-        <Label>Save Preset</Label>
-        <div className="mt-2 flex gap-2">
-          <input type="text" value={presetName} onChange={(e) => setPresetName(e.target.value)}
-            placeholder="Preset name…"
-            className="flex-1 text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors placeholder:text-zinc-300" />
-          <button onClick={saveCurrentPreset}
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-900 hover:bg-zinc-700 text-white text-xs font-semibold rounded-lg transition-colors">
-            <Save size={12} /> Save
-          </button>
-        </div>
+      <SectionLabelNew>Save Preset</SectionLabelNew>
+      <div className="flex gap-2 mb-6">
+        <input type="text" value={presetName} onChange={(e) => setPresetName(e.target.value)}
+          placeholder="Name this preset…"
+          className="flex-1 text-sm bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:bg-white transition-all placeholder:text-zinc-300"
+        />
+        <button onClick={saveCurrentPreset}
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-900 hover:bg-zinc-700 active:scale-95 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+          <Save size={12} /> Save
+        </button>
       </div>
+
       {savedPresets.length > 0 && (
-        <div className="mb-5">
-          <Label>Saved ({savedPresets.length})</Label>
-          <div className="mt-2 space-y-1.5 max-h-52 overflow-y-auto pr-1">
+        <>
+          <SectionLabelNew>Saved · {savedPresets.length}</SectionLabelNew>
+          <div className="space-y-1.5 max-h-52 overflow-y-auto mb-6">
             {savedPresets.map((p) => (
               <div key={p.id} className="flex items-center gap-2 group">
                 <button onClick={() => applyState(p.state)}
-                  className="flex-1 flex items-center gap-2 px-3 py-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-300 rounded-lg text-xs text-zinc-700 font-medium transition-all text-left">
-                  <FolderOpen size={12} className="text-zinc-400 shrink-0" />
+                  className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 rounded-xl text-xs text-zinc-700 font-medium transition-all text-left">
+                  <FolderOpen size={12} className="text-zinc-300 shrink-0" />
                   <span className="truncate">{p.name}</span>
                 </button>
                 <button onClick={() => deletePreset(p.id)}
-                  className="p-1.5 text-zinc-300 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+                  className="p-1.5 rounded-lg text-zinc-200 hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100">
                   <Trash2 size={12} />
                 </button>
               </div>
             ))}
           </div>
-        </div>
+        </>
       )}
+
       <Divider />
-      <div className="mb-5">
-        <Label>Batch Export</Label>
-        <p className="text-[11px] text-zinc-400 mt-1 mb-3">Downloads 1:1, 4:5 and 9:16 at 1080px — three files at once.</p>
-        <button onClick={handleBatchExport} disabled={batchExporting || exporting}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-900 hover:bg-zinc-700 disabled:bg-zinc-300 text-white text-xs font-semibold rounded-lg transition-colors">
-          {batchExporting ? (
-            <><Loader2 size={13} className="animate-spin" /> Exporting {batchProgress}/{PRESETS.length}…</>
-          ) : (
-            <><Layers size={13} /> Export All 3 Ratios</>
-          )}
-        </button>
-      </div>
+
+      <SectionLabelNew>Batch Export</SectionLabelNew>
+      <p className="text-xs text-zinc-400 leading-relaxed mb-4">
+        Downloads <span className="font-semibold text-zinc-500">1:1</span>, <span className="font-semibold text-zinc-500">4:5</span> and <span className="font-semibold text-zinc-500">9:16</span> at 1080px — three files at once.
+      </p>
+      <button onClick={handleBatchExport} disabled={batchExporting || exporting}
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-900 hover:bg-zinc-700 disabled:bg-zinc-200 disabled:text-zinc-400 active:scale-[0.98] text-white text-sm font-bold rounded-2xl transition-all shadow-sm">
+        {batchExporting ? (
+          <><Loader2 size={14} className="animate-spin" /> Exporting {batchProgress} / {PRESETS.length}…</>
+        ) : (
+          <><Layers size={14} /> Export All 3 Ratios</>
+        )}
+      </button>
     </div>
   )
 
@@ -596,17 +630,17 @@ export default function App() {
 
   // ── Shared tab nav ──
   const TabNav = ({ mobile = false }) => (
-    <div className={`flex ${mobile ? 'border-b border-zinc-100 px-4' : 'border-b border-zinc-100 px-3 pt-3'} gap-0.5`}>
+    <div className={`flex gap-1 ${mobile ? '' : ''}`}>
       {MOBILE_TABS.map((t) => {
         const Icon = t.icon
-        return mobile ? (
+        const isActive = activeTab === t.id
+        return (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold tracking-wide transition-all border-b-2 ${activeTab === t.id ? 'border-zinc-900 text-zinc-900' : 'border-transparent text-zinc-400'}`}>
-            <Icon size={14} />{t.label}
-          </button>
-        ) : (
-          <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-t-md text-[10px] font-semibold tracking-wide transition-all ${activeTab === t.id ? 'bg-zinc-900 text-white' : 'text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50'}`}>
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-[10px] font-bold tracking-wide transition-all duration-150 ${
+              isActive
+                ? 'bg-zinc-900 text-white'
+                : 'text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100'
+            }`}>
             <Icon size={13} />{t.label}
           </button>
         )
@@ -618,31 +652,36 @@ export default function App() {
   //  RENDER
   // ══════════════════════════════════════════════════════════════════
   return (
-    <div className="h-[100dvh] flex flex-col bg-zinc-50 overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="h-[100dvh] flex flex-col bg-zinc-100 overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── Header ── */}
-      <header className="shrink-0 h-14 bg-white border-b border-zinc-200 flex items-center px-4 md:px-6 gap-3 z-10">
+      <header className="shrink-0 h-14 bg-white border-b border-zinc-200 flex items-center px-4 md:px-5 gap-3 z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 bg-zinc-900 rounded-md flex items-center justify-center">
+          <div className="w-7 h-7 bg-zinc-900 rounded-xl flex items-center justify-center shadow-sm">
             <ImageIcon size={13} className="text-white" />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-zinc-900">Poetry Canvas</span>
-          <span className="hidden sm:inline text-xs text-zinc-300 font-light">— Instagram</span>
+          <div>
+            <span className="text-sm font-bold tracking-tight text-zinc-900">Poetry Canvas</span>
+            <span className="hidden sm:inline text-xs text-zinc-300 ml-2 font-normal">for Instagram</span>
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+
+        <div className="ml-auto flex items-center gap-1.5">
           {/* Format picker */}
           <div className="relative">
             <button onClick={() => setShowFormatMenu(v => !v)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
-              {exportFormat}<ChevronDown size={11} />
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
+              {exportFormat}<ChevronDown size={10} />
             </button>
             {showFormatMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowFormatMenu(false)} />
-                <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-zinc-200 rounded-lg shadow-lg overflow-hidden min-w-[72px]">
+                <div className="absolute right-0 top-full mt-1.5 z-20 bg-white border border-zinc-200 rounded-2xl shadow-xl overflow-hidden min-w-[72px]">
                   {['png','jpeg'].map(f => (
                     <button key={f} onClick={() => { setExportFormat(f); setShowFormatMenu(false) }}
-                      className={`w-full px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors ${exportFormat === f ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-50'}`}>
+                      className={`w-full px-4 py-2.5 text-left text-xs font-bold uppercase tracking-widest transition-colors ${
+                        exportFormat === f ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-50'
+                      }`}>
                       {f}
                     </button>
                   ))}
@@ -650,9 +689,10 @@ export default function App() {
               </>
             )}
           </div>
+
           {/* Export button */}
           <button onClick={() => handleExport(exportFormat)} disabled={exporting || batchExporting}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-700 disabled:bg-zinc-300 text-white text-xs font-semibold rounded-md transition-colors shadow-sm">
+            className="flex items-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-700 disabled:bg-zinc-200 disabled:text-zinc-400 active:scale-95 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
             {exporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
             <span className="hidden sm:inline">{exporting ? 'Exporting…' : 'Export'}</span>
           </button>
@@ -664,20 +704,35 @@ export default function App() {
 
         {/* ── Desktop sidebar ── */}
         <aside className="hidden md:flex w-72 shrink-0 bg-white border-r border-zinc-100 flex-col overflow-hidden">
-          <TabNav />
-          <div className="flex-1 overflow-y-auto px-5 py-5">{renderPanel()}</div>
+          <div className="px-3 py-3 border-b border-zinc-100">
+            <TabNav />
+          </div>
+          <div className="flex-1 overflow-y-auto px-5 py-5">
+            {renderPanel()}
+          </div>
           <div className="shrink-0 px-5 py-3 border-t border-zinc-100 flex items-center justify-between">
-            <span className="text-[10px] text-zinc-300">{preset.width} × {preset.height}px</span>
-            <span className="text-[10px] text-zinc-300">Poetry Canvas</span>
+            <span className="text-[10px] text-zinc-300 font-medium tabular-nums">{preset.width} × {preset.height}px</span>
+            <span className="text-[10px] text-zinc-300 font-medium">{preset.sublabel}</span>
           </div>
         </aside>
 
         {/* ── Canvas ── */}
-        <main ref={wrapperRef} className="flex-1 flex items-center justify-center bg-zinc-100 overflow-hidden"
-          style={{ backgroundImage: 'radial-gradient(circle, #d4d4d8 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+        <main ref={wrapperRef}
+          className="flex-1 flex items-center justify-center overflow-hidden"
+          style={{
+            background: '#e8e8ec',
+            backgroundImage: 'radial-gradient(circle, #d1d1d8 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}>
           {canvasDisplaySize.w > 0 && (
-            <div style={{ width: canvasDisplaySize.w, height: canvasDisplaySize.h, boxShadow: '0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)' }}
-              className="relative transition-all duration-300">
+            <div
+              style={{
+                width: canvasDisplaySize.w,
+                height: canvasDisplaySize.h,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.10)',
+                borderRadius: 4,
+              }}
+              className="relative">
 
               {/* Captured node */}
               <div ref={canvasRef}
@@ -717,13 +772,13 @@ export default function App() {
                   gap={frameGap} radius={frameRadius} scale={scaleFactor} />
               </div>
 
-              {/* Loading overlay */}
+              {/* Export overlay */}
               {(exporting || batchExporting) && (
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
-                  <div className="flex items-center gap-2 bg-white shadow-lg rounded-lg px-4 py-2.5 border border-zinc-200">
-                    <Loader2 size={15} className="animate-spin text-zinc-400" />
-                    <span className="text-xs font-medium text-zinc-600">
-                      {batchExporting ? `Exporting ${batchProgress + 1}/${PRESETS.length}…` : `Rendering at ${preset.width}px…`}
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center">
+                  <div className="flex items-center gap-2.5 bg-white shadow-xl rounded-2xl px-5 py-3 border border-zinc-100">
+                    <Loader2 size={14} className="animate-spin text-zinc-400" />
+                    <span className="text-xs font-semibold text-zinc-700">
+                      {batchExporting ? `Exporting ${batchProgress + 1} / ${PRESETS.length}…` : `Rendering at ${preset.width}px…`}
                     </span>
                   </div>
                 </div>
@@ -733,31 +788,45 @@ export default function App() {
         </main>
       </div>
 
-      {/* ══ Mobile bottom sheet ══ */}
-      <div className={`md:hidden fixed inset-0 bg-black/40 z-30 transition-opacity duration-300 ${mobileDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setMobileDrawerOpen(false)} />
+      {/* ══ Mobile bottom sheet backdrop ══ */}
+      <div
+        className={`md:hidden fixed inset-0 bg-black/30 z-30 transition-opacity duration-300 ${mobileDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setMobileDrawerOpen(false)}
+      />
 
-      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white rounded-t-2xl shadow-2xl transition-transform duration-300 ease-out ${mobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'}`}
-        style={{ maxHeight: '82dvh' }}>
+      {/* ══ Mobile bottom sheet ══ */}
+      <div
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out ${mobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'}`}
+        style={{ maxHeight: '86dvh' }}>
+
+        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-zinc-200 rounded-full" />
         </div>
-        <div className="flex border-b border-zinc-100 px-4">
-          <TabNav mobile />
+
+        {/* Tabs + close */}
+        <div className="flex items-center gap-2 px-3 pb-2 border-b border-zinc-100">
+          <div className="flex-1">
+            <TabNav mobile />
+          </div>
           <button onClick={() => setMobileDrawerOpen(false)}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2.5 text-zinc-400 hover:text-zinc-700 border-b-2 border-transparent">
-            <X size={14} /><span className="text-[10px]">Close</span>
+            className="flex items-center justify-center w-9 h-9 rounded-xl text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors shrink-0">
+            <X size={16} />
           </button>
         </div>
-        <div className="overflow-y-auto px-5 py-4" style={{ maxHeight: 'calc(82dvh - 100px)' }}>
+
+        {/* Panel content */}
+        <div className="overflow-y-auto px-5 pt-5 pb-8" style={{ maxHeight: 'calc(86dvh - 110px)' }}>
           {renderPanel()}
         </div>
       </div>
 
       {/* ── Mobile FAB ── */}
-      <button onClick={() => setMobileDrawerOpen(true)}
-        className="md:hidden fixed bottom-5 right-5 z-20 flex items-center gap-2 px-4 py-3 bg-zinc-900 text-white text-sm font-semibold rounded-full shadow-xl hover:bg-zinc-700 active:scale-95 transition-all">
-        <SlidersHorizontal size={16} />Controls
+      <button
+        onClick={() => setMobileDrawerOpen(true)}
+        className="md:hidden fixed bottom-6 right-5 z-20 flex items-center gap-2 px-5 py-3.5 bg-zinc-900 text-white text-sm font-bold rounded-2xl shadow-2xl hover:bg-zinc-700 active:scale-95 transition-all">
+        <SlidersHorizontal size={15} />
+        <span>Edit</span>
       </button>
     </div>
   )
