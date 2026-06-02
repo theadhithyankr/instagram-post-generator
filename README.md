@@ -1,46 +1,31 @@
 # Instagram Post Generator
 
-## Overview
-Post Generator Insta is a React post-design tool for creating downloadable styled graphics, such as quote or poetry posts. It includes editing controls for text, alignment, colors, images, layers, and export formats.
+React post-design generator for creating downloadable styled quote or poetry graphics.
 
-## Features
-- Canvas-like post editor UI.
-- Text formatting, alignment, color, and layout controls.
-- Image and layer management controls.
-- Export support through `html-to-image`.
-- Vite-powered development workflow.
+## Key Features
+- React post-design generator for creating downloadable styled quote or poetry graphics
+- Package scripts provide reproducible development, build, and preview commands.
 
 ## Tech Stack
+- HTML/CSS
 - React
-- Vite
-- Tailwind CSS
-- Lucide React
-- html-to-image
 
-## Development
-Install dependencies:
+## Project Structure
+- Key files: index.html.
 
+## Setup and Run
 ```bash
+git clone https://github.com/theadhithyankr/instagram-post-generator.git
+cd instagram-post-generator
 npm install
-```
-
-Start the development server:
-
-```bash
 npm run dev
-```
-
-Build for production:
-
-```bash
 npm run build
-```
-
-Preview the production build:
-
-```bash
 npm run preview
 ```
 
-## Status
-Private creative tooling project for generating social media graphics.
+## What This Project Demonstrates
+- Building user-facing web applications with component-based UI and modern frontend tooling.
+- Presenting project scope, setup, and technical choices clearly for reviewers and recruiters.
+
+## Repository
+- GitHub: https://github.com/theadhithyankr/instagram-post-generator
