@@ -1,4 +1,4 @@
-# Post Generator Insta
+# Instagram Post Generator
 
 ## Overview
 Post Generator Insta is a React post-design tool for creating downloadable styled graphics, such as quote or poetry posts. It includes editing controls for text, alignment, colors, images, layers, and export formats.
