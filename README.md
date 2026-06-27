@@ -1,31 +1,65 @@
+<div align="center">
+
 # Instagram Post Generator
 
-React post-design generator for creating downloadable styled quote or poetry graphics.
+Tool for generating Instagram post content or visuals.
+
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+
+[Repository](https://github.com/theadhithyankr/instagram-post-generator)
+
+</div>
+
+## Overview
+
+Instagram Post Generator is a content generation project in the TheAdhithyanKR/instagram-post-generator repository. React post-design generator for creating downloadable styled quote or poetry graphics.
+
+The README was written from the repository contents, including its manifest files, source tree, and available project metadata. The primary manifest is $(System.Collections.Hashtable.Path), and the commands below are taken from its scripts.
 
 ## Key Features
-- React post-design generator for creating downloadable styled quote or poetry graphics
-- Package scripts provide reproducible development, build, and preview commands.
+
+- Post-generation workflow for social content
+- Inputs organized around reusable creator prompts
+- Preview or output surface for generated content
+- Practical creator-tool concept
 
 ## Tech Stack
-- HTML/CSS
-- React
+
+- Vite
 
 ## Project Structure
-- Key files: index.html.
 
-## Setup and Run
-```bash
-git clone https://github.com/theadhithyankr/instagram-post-generator.git
-cd instagram-post-generator
+`	ext
+.
+|-- index.html
+|-- package.json
+|-- package-lock.json
+|-- postcss.config.js
+|-- README.md
+|-- src/App.jsx
+|-- src/index.css
+|-- src/main.jsx
+|-- tailwind.config.js
+|-- vercel.json
+|-- vite.config.js
+`
+
+## Setup
+
+`ash
+cd node_modules\.vite\deps
 npm install
-npm run dev
-npm run build
-npm run preview
-```
+npm test
+`
 
 ## What This Project Demonstrates
-- Building user-facing web applications with component-based UI and modern frontend tooling.
-- Presenting project scope, setup, and technical choices clearly for reviewers and recruiters.
 
-## Repository
-- GitHub: https://github.com/theadhithyankr/instagram-post-generator
+- Ability to turn a focused product idea into a working codebase
+- Practical use of the repository's chosen framework and tooling
+- Attention to deployable structure, repeatable setup, and portfolio-ready presentation
+- Project-specific implementation around content generation
+
+## Links
+
+- Repository: [https://github.com/theadhithyankr/instagram-post-generator](https://github.com/theadhithyankr/instagram-post-generator)
+- Live demo: [https://post-generator-insta.vercel.app](https://post-generator-insta.vercel.app)
