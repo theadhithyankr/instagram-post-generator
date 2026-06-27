@@ -14,7 +14,7 @@ Tool for generating Instagram post content or visuals.
 
 Instagram Post Generator is a content generation project in the TheAdhithyanKR/instagram-post-generator repository. React post-design generator for creating downloadable styled quote or poetry graphics.
 
-The README was written from the repository contents, including its manifest files, source tree, and available project metadata. The primary manifest is $(@{Path=node_modules/.vite/deps/package.json; Json=}.Path), and the commands below are taken from its scripts.
+The README was written from the repository contents, including its manifest files, source tree, and available project metadata. The primary manifest is `node_modules/.vite/deps/package.json`, and the commands below are taken from its scripts.
 
 ## Key Features
 
